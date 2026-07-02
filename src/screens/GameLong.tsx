@@ -88,17 +88,18 @@ export default function GameLong() {
     <div className="h-full flex flex-col">
       <Hud timeLeft={timeLeft} cpm={cpm} accuracy={accuracy} hangulMode={engine.hangulMode} />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-12 gap-8">
-        <p className="text-lime-300 text-2xl neon-text">🏆 장문 챌린지 — 랭킹전</p>
-        <div className="w-full max-w-6xl border-2 border-lime-500/50 rounded-2xl p-10 bg-slate-950/80">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-4 gap-5 min-h-0">
+        <p className="text-lime-300 text-xl neon-text shrink-0">🏆 장문 챌린지 — 랭킹전</p>
+        {/* 장문 전체가 화면에 보이도록 작은 글씨 + 세로 여유, 넘치면 스크롤 */}
+        <div className="w-full max-w-7xl border-2 border-lime-500/50 rounded-2xl px-8 py-6 bg-slate-950/80 overflow-y-auto min-h-0">
           <DiffText
             target={target}
             committed={engine.committed}
             composing={engine.composing}
-            className="text-3xl md:text-4xl"
+            sizeClass="text-xl md:text-2xl"
           />
         </div>
-        <div className="w-full max-w-6xl h-4 bg-slate-800 rounded-full overflow-hidden">
+        <div className="w-full max-w-7xl h-3 bg-slate-800 rounded-full overflow-hidden shrink-0">
           <div className="h-full bg-lime-400 transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>

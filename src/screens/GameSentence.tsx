@@ -108,17 +108,17 @@ export default function GameSentence() {
     <div className="h-full flex flex-col">
       <Hud timeLeft={timeLeft} cpm={cpm} accuracy={accuracy} hangulMode={engine.hangulMode} />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-12 gap-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 gap-8 min-h-0">
         <p className="text-slate-500 text-xl">완료한 문장 {doneCountRef.current}개 · Enter로 건너뛰기</p>
-        <div className="w-full max-w-5xl border-2 border-fuchsia-500/50 rounded-2xl p-10 bg-slate-950/80">
+        <div className="w-full max-w-5xl border-2 border-fuchsia-500/50 rounded-2xl px-10 py-8 bg-slate-950/80">
           <DiffText
             target={target}
             committed={engine.committed}
             composing={engine.composing}
-            className="text-4xl md:text-5xl"
+            sizeClass="text-3xl md:text-4xl"
           />
         </div>
-        <p className="text-slate-600 text-2xl max-w-4xl truncate">다음: {next}</p>
+        <p className="text-slate-600 text-xl max-w-4xl truncate">다음: {next}</p>
       </div>
     </div>
   )

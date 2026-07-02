@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { isMuted, toggleMute } from '../lib/audio'
 
 interface HudProps {
@@ -13,6 +14,7 @@ interface HudProps {
 /** 게임 상단 HUD: 남은 시간·타수·정확도·콤보·생명·입력모드·음소거 */
 export default function Hud({ timeLeft, cpm, accuracy, combo, lives, hangulMode }: HudProps) {
   const [muted, setMuted] = useState(isMuted())
+  const navigate = useNavigate()
 
   return (
     <div className="flex items-center justify-between px-8 py-4 text-xl md:text-2xl border-b-2 border-cyan-500/40 bg-slate-950/70">
@@ -26,7 +28,19 @@ export default function Hud({ timeLeft, cpm, accuracy, combo, lives, hangulMode 
           <span key={combo} className="text-yellow-300 neon-text animate-combo">{combo} COMBO!</span>
         )}
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate('/')}
+          className="px-3 py-1 text-lg border-2 border-slate-600 rounded text-slate-300 active:scale-95"
+        >
+          🏠 처음
+        </button>
+        <button
+          onClick={() => navigate('/mode')}
+          className="px-3 py-1 text-lg border-2 border-slate-600 rounded text-slate-300 active:scale-95"
+        >
+          🎮 목록
+        </button>
         {lives !== undefined && (
           <span className="text-rose-400 tracking-widest">{'❤'.repeat(Math.max(0, lives))}</span>
         )}
