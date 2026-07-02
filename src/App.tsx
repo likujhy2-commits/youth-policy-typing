@@ -55,8 +55,9 @@ function KioskShell() {
   // 안드로이드 뒤로가기 차단 (관리자 화면 제외)
   useEffect(() => {
     if (isAdmin) return
-    history.pushState(null, '', location.pathname)
-    const onPop = () => history.pushState(null, '', location.pathname)
+    // window.location.href 사용: 하위 경로(base) 배포에서도 전체 URL 유지
+    history.pushState(null, '', window.location.href)
+    const onPop = () => history.pushState(null, '', window.location.href)
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [isAdmin, location.pathname])

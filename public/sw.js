@@ -1,8 +1,9 @@
 // 오프라인 내성용 서비스워커: 앱 셸은 캐시 우선, 내비게이션은 네트워크 우선(실패 시 캐시)
 const CACHE = 'typing-kiosk-v1'
 
+// './'는 SW 위치 기준 → 하위 경로(GitHub Pages 등) 배포에서도 동작
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/'])))
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./'])))
   self.skipWaiting()
 })
 
@@ -26,10 +27,10 @@ self.addEventListener('fetch', (e) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone()
-          caches.open(CACHE).then((c) => c.put('/', copy))
+          caches.open(CACHE).then((c) => c.put('./', copy))
           return res
         })
-        .catch(() => caches.match('/')),
+        .catch(() => caches.match('./')),
     )
     return
   }
