@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="20" fill="#0a0a1a"/>
+  <rect x="14" y="44" width="100" height="52" rx="10" fill="none" stroke="#22d3ee" stroke-width="4"/>
+  <g fill="#22d3ee">
+    <rect x="24" y="54" width="12" height="10" rx="2"/>
+    <rect x="40" y="54" width="12" height="10" rx="2"/>
+    <rect x="56" y="54" width="12" height="10" rx="2"/>
+    <rect x="72" y="54" width="12" height="10" rx="2"/>
+    <rect x="88" y="54" width="14" height="10" rx="2" fill="#e879f9"/>
+    <rect x="24" y="70" width="14" height="10" rx="2" fill="#a3e635"/>
+    <rect x="42" y="70" width="44" height="10" rx="2"/>
+    <rect x="90" y="70" width="12" height="10" rx="2"/>
+  </g>
+  <text x="64" y="34" text-anchor="middle" font-family="monospace" font-size="22" fill="#e879f9">타닥</text>
+</svg>

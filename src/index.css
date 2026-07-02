@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+/* 한국어 픽셀 폰트 (오프라인 대비 SW 캐시 대상) */
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/DungGeunMo.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
+}
+
+:root {
+  --neon-cyan: #22d3ee;
+  --neon-magenta: #e879f9;
+  --neon-lime: #a3e635;
+}
+
+html,
+body {
+  background: #0a0a1a;
+  color: #e2e8f0;
+  font-family: 'DungGeunMo', 'Galmuri11', ui-monospace, monospace;
+  height: 100%;
+  overflow: hidden;
+  /* 키오스크: 텍스트 선택·콜아웃·더블탭 줌 차단 */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+/* 관리자 페이지 입력 필드는 선택 허용 */
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#root {
+  height: 100%;
+}
+
+.neon-text {
+  text-shadow: 0 0 8px currentColor, 0 0 24px currentColor;
+}
+
+.neon-box {
+  box-shadow: 0 0 8px var(--neon-cyan), inset 0 0 8px rgb(34 211 238 / 0.25);
+}
+
+.crt::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.12) 0px, rgb(0 0 0 / 0.12) 1px, transparent 1px, transparent 3px);
+}
+
+@keyframes blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1.2s step-end infinite;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+  to { transform: translateY(0); }
+}
+.animate-float {
+  animation: floatUp 3.5s ease-in-out infinite;
+}
+
+@keyframes popCombo {
+  0% { transform: scale(1.6); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-combo {
+  animation: popCombo 0.18s ease-out;
+}

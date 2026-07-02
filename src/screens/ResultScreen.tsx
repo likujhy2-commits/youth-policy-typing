@@ -1,0 +1,96 @@
+import { useEffect, useRef, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import QrCode from '../components/QrCode'
+import { useSession } from '../context/SessionContext'
+import { addLocalPlay, getTodayRanking, gradeFor, MODE_LABEL, type RankEntry } from '../lib/score'
+import { savePlay } from '../lib/offlineQueue'
+
+const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) ?? 'https://www.gwangju.go.kr'
+const AUTO_RETURN_SEC = 10
+
+export default function ResultScreen() {
+  const navigate = useNavigate()
+  const { participant, result } = useSession()
+  const [ranking, setRanking] = useState<RankEntry[]>([])
+  const [countdown, setCountdown] = useState(AUTO_RETURN_SEC)
+  const savedRef = useRef(false)
+
+  useEffect(() => {
+    if (!result || savedRef.current) return
+    savedRef.current = true
+    const play = { ...result, created_at: new Date().toISOString() }
+    addLocalPlay(play, participant?.name ?? null)
+    void savePlay(play, participant?.ref ?? null).then(() => getTodayRanking(result.mode).then(setRanking))
+  }, [result, participant])
+
+  useEffect(() => {
+    const t = setInterval(() => setCountdown((c) => c - 1), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    if (countdown <= 0) navigate('/')
+  }, [countdown, navigate])
+
+  if (!result) return <Navigate to="/" replace />
+
+  const grade = gradeFor(result.cpm)
+
+  return (
+    <div className="h-full flex items-center justify-center gap-12 px-10">
+      {/* 좌: 내 결과 */}
+      <div className="flex-1 max-w-xl text-center">
+        <p className="text-slate-400 text-2xl mb-2">{MODE_LABEL[result.mode]} 결과</p>
+        <p className="text-7xl mb-3">{grade.emoji}</p>
+        <p className="text-4xl text-fuchsia-300 neon-text mb-8">{grade.title}</p>
+
+        <p className="text-8xl text-cyan-300 neon-text tabular-nums mb-6">{result.score.toLocaleString()}</p>
+        <div className="flex justify-center gap-10 text-2xl mb-10">
+          <span className="text-lime-300">{result.cpm} 타/분</span>
+          <span className="text-fuchsia-300">정확도 {result.accuracy}%</span>
+        </div>
+
+        <div className="inline-flex items-center gap-5 border-2 border-cyan-500/60 rounded-2xl p-5 bg-white/95">
+          <QrCode url={APPLY_URL} size={150} />
+          <p className="text-slate-900 text-xl text-left leading-snug">
+            일경험드림사업<br />
+            <b>지금 바로 신청!</b><br />
+            📱 QR을 찍어보세요
+          </p>
+        </div>
+      </div>
+
+      {/* 우: 오늘의 랭킹 */}
+      <div className="w-96 border-2 border-slate-700 rounded-2xl p-6 bg-slate-950/80">
+        <h3 className="text-2xl text-yellow-300 neon-text mb-4 text-center">🏆 오늘의 TOP 10</h3>
+        <ol className="space-y-2 text-xl">
+          {ranking.length === 0 && <p className="text-slate-500 text-center py-6">아직 기록이 없어요</p>}
+          {ranking.map((r, i) => (
+            <li key={i} className="flex justify-between tabular-nums">
+              <span>
+                <span className={i < 3 ? 'text-yellow-300' : 'text-slate-500'}>{i + 1}.</span>{' '}
+                <span className="text-slate-200">{r.name}</span>
+              </span>
+              <span className="text-cyan-300">{r.score.toLocaleString()}</span>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={() => navigate('/mode')}
+            className="flex-1 py-3 text-xl rounded-lg bg-cyan-500 text-slate-950 font-bold active:scale-95"
+          >
+            다시 하기
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="flex-1 py-3 text-xl rounded-lg border-2 border-slate-600 text-slate-300 active:scale-95"
+          >
+            처음으로 ({Math.max(0, countdown)})
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

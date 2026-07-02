@@ -1,0 +1,18 @@
+{
+  "name": "청년정책 타자게임",
+  "short_name": "타자게임",
+  "description": "광주 청년일경험드림사업 홍보 타자게임 키오스크",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
