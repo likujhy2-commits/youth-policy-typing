@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { maskName, todayStartISO } from './util'
-import type { PlayData } from './offlineQueue'
+import { pendingPlayKeys, type PlayData } from './offlineQueue'
 
 export type GameMode = 'rain' | 'sentence' | 'long'
 
@@ -58,17 +58,21 @@ export function addLocalPlay(play: PlayData, name: string | null) {
 
 export async function getTodayRanking(mode: GameMode, limit = 10): Promise<RankEntry[]> {
   const entries: RankEntry[] = []
+  let serverOk = false
 
   if (supabase && navigator.onLine) {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('ranking_today')
         .select('masked_name, mode, score, cpm')
         .eq('mode', mode)
         .order('score', { ascending: false })
         .limit(limit)
-      for (const r of data ?? []) {
-        entries.push({ name: r.masked_name, mode: r.mode, score: r.score, cpm: r.cpm })
+      if (!error) {
+        serverOk = true
+        for (const r of data ?? []) {
+          entries.push({ name: r.masked_name, mode: r.mode, score: r.score, cpm: r.cpm })
+        }
       }
     } catch {
       // 서버 랭킹 실패 → 로컬만 표시
@@ -76,10 +80,14 @@ export async function getTodayRanking(mode: GameMode, limit = 10): Promise<RankE
   }
 
   try {
+    // 서버 랭킹을 받아온 경우 서버가 원본: 로컬 기록은 아직 미전송(큐 대기)분만 합친다.
+    // (전송 완료된 기록까지 합치면 관리자 페이지에서 삭제해도 랭킹에 계속 남는다)
+    const pending = serverOk ? pendingPlayKeys() : null
     const day = new Date().toDateString()
     const list: LocalPlay[] = JSON.parse(localStorage.getItem(LOCAL_PLAYS_KEY) ?? '[]')
     for (const p of list) {
       if (p.day !== day || p.mode !== mode) continue
+      if (pending && !pending.has(`${p.mode}|${p.score}|${p.cpm}|${p.created_at}`)) continue
       entries.push({ name: p.maskedName, mode: p.mode, score: p.score, cpm: p.cpm, local: true })
     }
   } catch {

@@ -54,6 +54,17 @@ export function pendingCount(): number {
   return loadQueue().length
 }
 
+/** 아직 서버로 전송되지 못한 플레이의 식별 키 (mode|score|cpm|created_at) */
+export function pendingPlayKeys(): Set<string> {
+  const keys = new Set<string>()
+  for (const item of loadQueue()) {
+    if (item.kind === 'play') {
+      keys.add(`${item.data.mode}|${item.data.score}|${item.data.cpm}|${item.data.created_at}`)
+    }
+  }
+  return keys
+}
+
 const isTempId = (ref: string) => ref.startsWith('temp_')
 
 /**
