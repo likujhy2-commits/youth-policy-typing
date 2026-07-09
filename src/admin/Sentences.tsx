@@ -10,11 +10,21 @@ interface Row {
 
 const LEVEL_LABEL: Record<number, string> = { 1: '키워드 (산성비)', 2: '문장', 3: '장문' }
 
+/** 산성비(레벨 1) 낱말은 스페이스가 "제출" 키라 공백이 있으면 맞출 수 없다 */
+function validateText(level: number, text: string): string | null {
+  if (level === 1 && /\s/.test(text)) {
+    return '산성비 키워드에는 띄어쓰기를 넣을 수 없어요 (스페이스가 제출 키라서 맞출 수 없게 됩니다)'
+  }
+  return null
+}
+
 export default function Sentences() {
   const [rows, setRows] = useState<Row[]>([])
   const [level, setLevel] = useState(1)
   const [text, setText] = useState('')
   const [filter, setFilter] = useState(0)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
 
   const load = async () => {
     if (!supabase) return
@@ -28,8 +38,24 @@ export default function Sentences() {
 
   const add = async () => {
     if (!supabase || !text.trim()) return
+    const err = validateText(level, text.trim())
+    if (err) return alert(err)
     await supabase.from('sentences').insert({ level, text: text.trim(), is_active: true })
     setText('')
+    void load()
+  }
+
+  const startEdit = (row: Row) => {
+    setEditingId(row.id)
+    setEditText(row.text)
+  }
+
+  const saveEdit = async (row: Row) => {
+    if (!supabase || !editText.trim()) return
+    const err = validateText(row.level, editText.trim())
+    if (err) return alert(err)
+    await supabase.from('sentences').update({ text: editText.trim() }).eq('id', row.id)
+    setEditingId(null)
     void load()
   }
 
@@ -103,7 +129,19 @@ export default function Sentences() {
           {visible.map((r) => (
             <tr key={r.id} className={`border-b border-slate-800 ${r.is_active ? '' : 'opacity-40'}`}>
               <td className="py-2">Lv.{r.level}</td>
-              <td className="pr-4">{r.text}</td>
+              <td className="pr-4">
+                {editingId === r.id ? (
+                  <textarea
+                    className="w-full bg-slate-900 border border-cyan-500 rounded px-2 py-1"
+                    rows={r.level === 3 ? 4 : 2}
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    autoFocus
+                  />
+                ) : (
+                  r.text
+                )}
+              </td>
               <td>
                 <button
                   onClick={() => void toggle(r)}
@@ -112,10 +150,26 @@ export default function Sentences() {
                   {r.is_active ? '활성' : '비활성'}
                 </button>
               </td>
-              <td className="text-right">
-                <button onClick={() => void remove(r.id)} className="text-rose-400 hover:underline text-sm">
-                  삭제
-                </button>
+              <td className="text-right whitespace-nowrap">
+                {editingId === r.id ? (
+                  <>
+                    <button onClick={() => void saveEdit(r)} className="text-lime-300 hover:underline text-sm mr-3">
+                      저장
+                    </button>
+                    <button onClick={() => setEditingId(null)} className="text-slate-400 hover:underline text-sm">
+                      취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => startEdit(r)} className="text-cyan-300 hover:underline text-sm mr-3">
+                      수정
+                    </button>
+                    <button onClick={() => void remove(r.id)} className="text-rose-400 hover:underline text-sm">
+                      삭제
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
