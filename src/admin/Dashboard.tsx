@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { flushQueue, pendingCount } from '../lib/offlineQueue'
 import { supabase } from '../lib/supabase'
-import { todayStartISO } from '../lib/util'
+import { dayRangeISO, todayLocalYMD } from '../lib/util'
 
 export default function Dashboard() {
+  const [day, setDay] = useState(todayLocalYMD())
   const [playsToday, setPlaysToday] = useState(0)
   const [participantsToday, setParticipantsToday] = useState(0)
   const [avgScore, setAvgScore] = useState(0)
@@ -13,20 +14,18 @@ export default function Dashboard() {
 
   const load = async () => {
     if (!supabase) return
-    const since = todayStartISO()
+    const { start, end } = dayRangeISO(day)
     const [{ count: pc }, { count: uc }, { data: plays }] = await Promise.all([
-      supabase.from('plays').select('*', { count: 'exact', head: true }).gte('created_at', since),
-      supabase.from('participants').select('*', { count: 'exact', head: true }).gte('created_at', since),
-      supabase.from('plays').select('score, created_at').gte('created_at', since).limit(2000),
+      supabase.from('plays').select('*', { count: 'exact', head: true }).gte('created_at', start).lt('created_at', end),
+      supabase.from('participants').select('*', { count: 'exact', head: true }).gte('created_at', start).lt('created_at', end),
+      supabase.from('plays').select('score, created_at').gte('created_at', start).lt('created_at', end).limit(2000),
     ])
     setPlaysToday(pc ?? 0)
     setParticipantsToday(uc ?? 0)
-    if (plays && plays.length > 0) {
-      setAvgScore(Math.round(plays.reduce((a, p) => a + p.score, 0) / plays.length))
-      const buckets = Array(24).fill(0)
-      for (const p of plays) buckets[new Date(p.created_at).getHours()]++
-      setHourly(buckets)
-    }
+    setAvgScore(plays && plays.length > 0 ? Math.round(plays.reduce((a, p) => a + p.score, 0) / plays.length) : 0)
+    const buckets = Array(24).fill(0)
+    for (const p of plays ?? []) buckets[new Date(p.created_at).getHours()]++
+    setHourly(buckets)
     setPending(pendingCount())
   }
 
@@ -35,13 +34,22 @@ export default function Dashboard() {
     const t = setInterval(() => void load(), 30_000)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [day])
 
   const max = Math.max(1, ...hourly)
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">대시보드 (오늘)</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xl font-bold">대시보드</h2>
+        <input
+          type="date"
+          className="bg-slate-900 border border-slate-600 rounded px-3 py-1 text-sm"
+          value={day}
+          max={todayLocalYMD()}
+          onChange={(e) => e.target.value && setDay(e.target.value)}
+        />
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           ['총 플레이', playsToday],

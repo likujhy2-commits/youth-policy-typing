@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { todayStartISO } from '../lib/util'
+import { dayRangeISO, todayLocalYMD } from '../lib/util'
 import { MODE_LABEL, type GameMode } from '../lib/score'
 
 interface Row {
@@ -16,13 +16,16 @@ interface Row {
 export default function Records() {
   const [rows, setRows] = useState<Row[]>([])
   const [mode, setMode] = useState<GameMode | 'all'>('all')
+  const [day, setDay] = useState(todayLocalYMD())
 
   const load = async () => {
     if (!supabase) return
+    const { start, end } = dayRangeISO(day)
     let q = supabase
       .from('plays')
       .select('id, mode, score, cpm, accuracy, created_at, participants(name)')
-      .gte('created_at', todayStartISO())
+      .gte('created_at', start)
+      .lt('created_at', end)
       .order('score', { ascending: false })
       .limit(300)
     if (mode !== 'all') q = q.eq('mode', mode)
@@ -33,7 +36,7 @@ export default function Records() {
   useEffect(() => {
     void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode])
+  }, [mode, day])
 
   const remove = async (id: string) => {
     if (!supabase || !confirm('이 기록을 삭제할까요? 랭킹에서 제거됩니다.')) return
@@ -43,8 +46,15 @@ export default function Records() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">기록 관리 (오늘, 점수순)</h2>
-      <div className="flex gap-2 mb-4">
+      <h2 className="text-xl font-bold mb-4">기록 관리 (점수순)</h2>
+      <div className="flex gap-2 mb-4 items-center flex-wrap">
+        <input
+          type="date"
+          className="bg-slate-900 border border-slate-600 rounded px-3 py-1 text-sm"
+          value={day}
+          max={todayLocalYMD()}
+          onChange={(e) => e.target.value && setDay(e.target.value)}
+        />
         {(['all', 'rain', 'sentence', 'long'] as const).map((m) => (
           <button
             key={m}
@@ -86,7 +96,7 @@ export default function Records() {
           ))}
         </tbody>
       </table>
-      {rows.length === 0 && <p className="text-slate-500 py-8 text-center">오늘 기록이 없습니다</p>}
+      {rows.length === 0 && <p className="text-slate-500 py-8 text-center">해당 날짜에 기록이 없습니다</p>}
     </div>
   )
 }

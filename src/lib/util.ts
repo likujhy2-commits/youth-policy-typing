@@ -46,6 +46,21 @@ export function todayStartISO(): string {
   return d.toISOString()
 }
 
+/** 오늘 날짜를 로컬 기준 YYYY-MM-DD로 */
+export function todayLocalYMD(): string {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+/** 특정 날짜(YYYY-MM-DD)의 로컬 기준 [당일 0시, 다음날 0시) ISO 범위 */
+export function dayRangeISO(day: string): { start: string; end: string } {
+  const d = new Date(`${day}T00:00:00`)
+  const next = new Date(d)
+  next.setDate(d.getDate() + 1)
+  return { start: d.toISOString(), end: next.toISOString() }
+}
+
 export function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
