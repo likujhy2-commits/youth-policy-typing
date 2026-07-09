@@ -4,6 +4,7 @@ import QrCode from '../components/QrCode'
 import { useSession } from '../context/SessionContext'
 import { addLocalPlay, getTodayRanking, gradeFor, MODE_LABEL, type RankEntry } from '../lib/score'
 import { savePlay } from '../lib/offlineQueue'
+import { addLongEntry } from '../lib/entryLimit'
 
 const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) ?? 'https://www.gwangju.go.kr'
 const AUTO_RETURN_SEC = 10
@@ -19,6 +20,8 @@ export default function ResultScreen() {
     if (!result || savedRef.current) return
     savedRef.current = true
     const play = { ...result, created_at: new Date().toISOString() }
+    // 랭킹전(장문)은 등록 참가자 기준 응모 1회 차감
+    if (result.mode === 'long' && participant) addLongEntry(participant.phone)
     addLocalPlay(play, participant?.name ?? null)
     void savePlay(play, participant?.ref ?? null).then(() => getTodayRanking(result.mode).then(setRanking))
   }, [result, participant])

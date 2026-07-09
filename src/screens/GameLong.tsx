@@ -6,18 +6,25 @@ import { useSession } from '../context/SessionContext'
 import { useTypingEngine } from '../hooks/useTypingEngine'
 import { sfx } from '../lib/audio'
 import { jamoCount } from '../lib/hangul/jamo'
+import { longEntriesLeft } from '../lib/entryLimit'
 import { getSentences } from '../lib/sentences'
 
 const DURATION = 90
 
 export default function GameLong() {
   const navigate = useNavigate()
-  const { setResult } = useSession()
+  const { participant, setResult } = useSession()
 
   const [target, setTarget] = useState('')
   const [timeLeft, setTimeLeft] = useState(DURATION)
   const endedRef = useRef(false)
   const startRef = useRef(performance.now())
+
+  // 응모 횟수를 다 쓴 참가자가 직접 진입한 경우 차단
+  const blocked = participant ? longEntriesLeft(participant.phone) <= 0 : false
+  useEffect(() => {
+    if (blocked) navigate('/mode', { replace: true })
+  }, [blocked, navigate])
 
   useEffect(() => {
     const paragraphs = getSentences(3)
