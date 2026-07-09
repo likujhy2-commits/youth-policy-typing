@@ -33,7 +33,7 @@ function KioskShell() {
     !isAdmin && !isAttract,
   )
 
-  // 키오스크 하드닝: 컨텍스트메뉴·핀치줌·뒤로가기 차단
+  // 키오스크 하드닝: 컨텍스트메뉴·핀치줌·드래그·뒤로가기 차단
   useEffect(() => {
     const prevent = (e: Event) => e.preventDefault()
     const preventPinch = (e: TouchEvent) => {
@@ -45,12 +45,46 @@ function KioskShell() {
     document.addEventListener('contextmenu', prevent)
     document.addEventListener('touchstart', preventPinch, { passive: false })
     document.addEventListener('wheel', preventZoomWheel, { passive: false })
+    document.addEventListener('dragstart', prevent)
     return () => {
       document.removeEventListener('contextmenu', prevent)
       document.removeEventListener('touchstart', preventPinch)
       document.removeEventListener('wheel', preventZoomWheel)
+      document.removeEventListener('dragstart', prevent)
     }
   }, [])
+
+  // 키오스크 하드닝: 외장 키보드의 브라우저 단축키 차단 (관리자 화면 제외)
+  useEffect(() => {
+    if (isAdmin) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      // 새로고침(F5, Ctrl+R)·전체화면 토글(F11)·브라우저 기능키
+      if (e.key === 'F5' || e.key === 'F11' || e.key.startsWith('Browser')) {
+        e.preventDefault()
+        return
+      }
+      // Ctrl/Cmd 조합: 새로고침·인쇄·저장·찾기·새창/탭·확대축소 등
+      if ((e.ctrlKey || e.metaKey) && 'rRpPsSfFnNtTwWoOuU+-=0'.includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isAdmin])
+
+  // 키오스크 하드닝: 브라우저로 열었을 때 첫 터치에서 전체화면 진입, 풀리면 재진입
+  // (PWA 전체화면 모드에서는 아무 동작 안 함)
+  useEffect(() => {
+    if (isAdmin) return
+    const onPointerDown = () => {
+      const standalone = window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches
+      if (!standalone && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {})
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [isAdmin])
 
   // 안드로이드 뒤로가기 차단 (관리자 화면 제외)
   useEffect(() => {

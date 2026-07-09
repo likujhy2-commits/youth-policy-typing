@@ -21,11 +21,17 @@ body {
   font-family: 'DungGeunMo', 'Galmuri11', ui-monospace, monospace;
   height: 100%;
   overflow: hidden;
-  /* 키오스크: 텍스트 선택·콜아웃·더블탭 줌 차단 */
+  /* 키오스크: 텍스트 선택·콜아웃·더블탭 줌·당겨서 새로고침 차단 */
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+/* 키오스크: 이미지 드래그 차단 */
+img {
+  -webkit-user-drag: none;
 }
 
 /* 관리자 페이지 입력 필드는 선택 허용 */
