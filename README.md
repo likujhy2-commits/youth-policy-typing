@@ -22,9 +22,13 @@ Supabase 없이도 게임은 전부 동작합니다(로컬 전용 모드 — 랭
 1. [supabase.com](https://supabase.com)에서 무료 프로젝트 생성
 2. SQL Editor에 `supabase/migrations/0001_init.sql` 내용 붙여넣고 실행
    - 테이블 4개 + RLS 정책 + 마스킹 랭킹 뷰 + 시드 문장이 생성됩니다
-3. Authentication → Users → **Add user**로 관리자 계정(이메일/비밀번호) 생성
+3. 이어서 `supabase/migrations/0003_content_v2.sql` 실행
+   - 게임 콘텐츠 전체(산성비 낱말 233 + 짧은 문장 100 + 장문 19)로 동기화됩니다 (여러 번 실행해도 안전)
+   - 원본 데이터는 `src/lib/defaultSentences.ts` — 서버 없이도 동일 콘텐츠로 동작
+   - `0002_taegeonso_sentences.sql`은 0003으로 대체되어 실행할 필요 없음
+4. Authentication → Users → **Add user**로 관리자 계정(이메일/비밀번호) 생성
    - Authentication → Providers → Email에서 "Confirm email" 꺼두면 편합니다
-4. `.env` 파일 생성 (`.env.example` 참고):
+5. `.env` 파일 생성 (`.env.example` 참고):
 
 ```
 VITE_SUPABASE_URL=https://xxxx.supabase.co
@@ -66,6 +70,14 @@ SPA 라우팅을 위해 `vercel.json`의 rewrites가 적용됩니다.
 - 타수(CPM)는 자모 분해 기준(예: "값"=4타)으로 한컴타자와 동일 체감
 - 90초 무입력 시 어떤 화면이든 대기 화면으로 자동 복귀
 - 네트워크가 끊겨도 게임은 계속 동작하며, 점수는 큐에 쌓였다가 복구 시 자동 전송 (관리자 대시보드에 미전송 건수 표시)
+
+### 키오스크 하드닝
+
+- 텍스트 선택·콜아웃·핀치줌·더블탭줌·컨텍스트메뉴·드래그 차단
+- 당겨서 새로고침(overscroll) 차단, 안드로이드 뒤로가기 차단
+- 외장 키보드 브라우저 단축키 차단: F5·F11·Ctrl+R/P/S/F/N/T/W/O/U·확대축소 (관리자 화면 제외)
+- 브라우저로 열었을 때는 첫 터치에서 전체화면 진입, 풀리면 다음 터치에서 재진입 (PWA 모드에서는 불필요)
+- Wake Lock으로 화면 꺼짐 방지, 서비스워커로 오프라인 캐시
 
 ## 관리자 페이지
 
