@@ -33,7 +33,8 @@ export function formatPhoneInput(raw: string): string {
 
 export function uuid(): string {
   if (crypto.randomUUID) return crypto.randomUUID()
-  return 'xxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, (c) => {
+  // 폴백도 DB uuid 컬럼에 저장 가능한 정식 포맷(8-4-4-4-12)이어야 한다
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
   })

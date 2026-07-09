@@ -74,12 +74,13 @@ const isTempId = (ref: string) => ref.startsWith('temp_')
 export async function saveParticipant(data: ParticipantData): Promise<string> {
   if (supabase && navigator.onLine) {
     try {
-      const { data: row, error } = await supabase
+      // id는 클라이언트에서 생성한다. insert 후 .select('id')로 돌려받는 방식은
+      // anon 키에 참가자 SELECT 권한이 없어(개인정보 보호 RLS) 등록 자체가 거부된다.
+      const id = uuid()
+      const { error } = await supabase
         .from('participants')
-        .insert({ name: data.name, phone: data.phone, consent_at: data.consent_at })
-        .select('id')
-        .single()
-      if (!error && row) return row.id as string
+        .insert({ id, name: data.name, phone: data.phone, consent_at: data.consent_at })
+      if (!error) return id
     } catch {
       // 큐로 폴백
     }
@@ -132,13 +133,11 @@ export async function flushQueue(): Promise<number> {
     for (const item of queue) {
       if (item.kind !== 'participant') continue
       try {
-        const { data: row, error } = await supabase
-          .from('participants')
-          .insert(item.data)
-          .select('id')
-          .single()
-        if (error || !row) throw error
-        idMap[item.tempId] = row.id as string
+        // saveParticipant와 동일: 클라이언트 생성 id로 insert (RETURNING 불가 — RLS)
+        const id = uuid()
+        const { error } = await supabase.from('participants').insert({ id, ...item.data })
+        if (error) throw error
+        idMap[item.tempId] = id
       } catch {
         remain.push(item)
       }
