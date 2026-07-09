@@ -31,7 +31,13 @@ export default function ModeSelectScreen() {
   }, [navigate, longBlocked])
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-10 px-8">
+    <div className="relative h-full flex flex-col items-center justify-center gap-8 px-8">
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-6 left-6 z-10 px-6 py-3 text-xl rounded-xl border-2 border-slate-600 text-slate-300 bg-slate-950/80 active:scale-95 transition hover:bg-slate-900"
+      >
+        ⌂ 처음으로
+      </button>
       <h2 className="text-5xl text-cyan-300 neon-text">게임 모드 선택</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
         {MODES.map((m) => {
@@ -57,12 +63,6 @@ export default function ModeSelectScreen() {
       </div>
       <p className="text-lime-300 text-2xl neon-text">🏆 랭킹전은 1인 당 응모 3번 가능합니다.</p>
       <p className="text-slate-500 text-xl">키보드 1 · 2 · 3 또는 터치로 선택하세요</p>
-      <button
-        onClick={() => navigate('/')}
-        className="px-8 py-3 text-xl rounded-xl border-2 border-slate-600 text-slate-300 active:scale-95 transition hover:bg-slate-900"
-      >
-        ⌂ 처음으로
-      </button>
     </div>
   )
 }
