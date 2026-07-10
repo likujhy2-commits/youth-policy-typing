@@ -47,7 +47,10 @@ export default function ResultScreen() {
     <div className="h-full flex items-center justify-center gap-12 px-10">
       {/* 좌: 내 결과 */}
       <div className="flex-1 max-w-xl text-center">
-        <p className="text-slate-400 text-2xl mb-2">{MODE_LABEL[result.mode]} 결과</p>
+        <p className="text-slate-400 text-2xl mb-2">
+          {participant ? `🎁 ${participant.name}님의 ` : '익명 체험 · '}
+          {MODE_LABEL[result.mode]} 결과
+        </p>
         <p className="text-7xl mb-3">{grade.emoji}</p>
         <p className="text-4xl text-fuchsia-300 neon-text mb-8">{grade.title}</p>
 

@@ -49,6 +49,13 @@ export default function ModeSelectScreen() {
         ⌂ 처음으로
       </button>
       <h2 className="text-5xl text-cyan-300 neon-text">게임 모드 선택</h2>
+      <p className="text-2xl -mt-4">
+        {participant ? (
+          <span className="text-lime-300">🎁 {participant.name}님 (경품 응모 중)</span>
+        ) : (
+          <span className="text-slate-500">익명 체험 모드 (경품 응모 안 됨)</span>
+        )}
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
         {MODES.map((m) => {
           const blocked = m.key === 'long' && longBlocked
