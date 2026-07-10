@@ -7,7 +7,10 @@ import { savePlay } from '../lib/offlineQueue'
 import { addLongEntry } from '../lib/entryLimit'
 
 // ||를 사용: CI에서 변수가 비어있으면 빈 문자열이 들어와 ??로는 못 거른다 (QR 생성 실패 원인)
-const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) || 'https://www.gwangju.go.kr'
+const QR_LINKS = [
+  { url: (import.meta.env.VITE_APPLY_URL as string | undefined) || 'https://gjyouthdream.com', label: '일경험드림 신청' },
+  { url: (import.meta.env.VITE_APPLY_URL2 as string | undefined) || 'https://kjcareer.co.kr', label: '국제커리어' },
+]
 const AUTO_RETURN_SEC = 30
 
 export default function ResultScreen() {
@@ -54,13 +57,13 @@ export default function ResultScreen() {
           <span className="text-fuchsia-300">정확도 {result.accuracy}%</span>
         </div>
 
-        <div className="inline-flex items-center gap-5 border-2 border-cyan-500/60 rounded-2xl p-5 bg-white/95">
-          <QrCode url={APPLY_URL} size={150} />
-          <p className="text-slate-900 text-xl text-left leading-snug">
-            일경험드림사업<br />
-            <b>지금 바로 신청!</b><br />
-            📱 QR을 찍어보세요
-          </p>
+        <div className="flex justify-center gap-4">
+          {QR_LINKS.map((q) => (
+            <div key={q.url} className="flex flex-col items-center gap-2 border-2 border-cyan-500/60 rounded-2xl p-4 bg-white/95">
+              <QrCode url={q.url} size={120} />
+              <p className="text-slate-900 text-lg font-bold">📱 {q.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
