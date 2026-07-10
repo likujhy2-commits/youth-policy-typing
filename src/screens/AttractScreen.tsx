@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../context/SessionContext'
+import { pendingCount } from '../lib/offlineQueue'
+import { supabase } from '../lib/supabase'
 
 // 대기 화면에 은은하게 띄울 대표 키워드 (전체 낱말을 쓰면 화면이 난잡해짐)
 // 중앙 문구를 가리지 않도록 위·아래 가장자리에만 배치
@@ -19,6 +21,17 @@ const KEYWORDS: Array<{ text: string; left: number; top: number }> = [
 export default function AttractScreen() {
   const navigate = useNavigate()
   const { resetSession } = useSession()
+
+  // 운영 진단용 상태: 버전 · 서버 연결 · 미전송 건수 · 온라인 여부
+  const [pending, setPending] = useState(pendingCount())
+  const [online, setOnline] = useState(navigator.onLine)
+  useEffect(() => {
+    const t = setInterval(() => {
+      setPending(pendingCount())
+      setOnline(navigator.onLine)
+    }, 5000)
+    return () => clearInterval(t)
+  }, [])
 
   useEffect(() => {
     resetSession()
@@ -65,6 +78,12 @@ export default function AttractScreen() {
       </p>
 
       <p className="absolute bottom-6 text-slate-600 text-lg">경품 추첨 참여 가능 · 무료 체험</p>
+
+      {/* 운영 진단용 상태 표시 (작게, 우하단) */}
+      <p className="absolute bottom-2 right-3 text-slate-700 text-xs tabular-nums">
+        v.{__BUILD_ID__} · {supabase ? (online ? '서버 연결됨' : '오프라인') : '서버 미설정'}
+        {pending > 0 && ` · 미전송 ${pending}건`}
+      </p>
     </div>
   )
 }
