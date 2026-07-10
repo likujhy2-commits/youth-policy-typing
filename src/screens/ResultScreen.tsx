@@ -6,7 +6,8 @@ import { addLocalPlay, getTodayRanking, gradeFor, MODE_LABEL, type RankEntry } f
 import { savePlay } from '../lib/offlineQueue'
 import { addLongEntry } from '../lib/entryLimit'
 
-const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) ?? 'https://www.gwangju.go.kr'
+// ||를 사용: CI에서 변수가 비어있으면 빈 문자열이 들어와 ??로는 못 거른다 (QR 생성 실패 원인)
+const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) || 'https://www.gwangju.go.kr'
 const AUTO_RETURN_SEC = 30
 
 export default function ResultScreen() {
