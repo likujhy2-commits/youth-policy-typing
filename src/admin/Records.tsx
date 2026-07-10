@@ -40,7 +40,11 @@ export default function Records() {
 
   const remove = async (id: string) => {
     if (!supabase || !confirm('이 기록을 삭제할까요? 랭킹에서 제거됩니다.')) return
-    await supabase.from('plays').delete().eq('id', id)
+    // .select()로 실제 삭제된 행을 돌려받아 0건(권한 만료 등 조용한 실패)을 감지
+    const { data, error } = await supabase.from('plays').delete().eq('id', id).select('id')
+    if (error || !data?.length) {
+      alert(error ? `삭제 실패: ${error.message}` : '삭제되지 않았습니다. 로그아웃 후 다시 로그인해서 시도해 보세요.')
+    }
     void load()
   }
 

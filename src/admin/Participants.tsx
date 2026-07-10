@@ -49,18 +49,23 @@ export default function Participants() {
 
   const removeOne = async (id: string) => {
     if (!supabase || !confirm('이 참가자를 삭제(파기)할까요? 플레이 기록의 연결도 해제됩니다.')) return
-    await supabase.from('participants').delete().eq('id', id)
+    // .select()로 실제 삭제된 행을 돌려받아 0건(권한 만료 등 조용한 실패)을 감지
+    const { data, error } = await supabase.from('participants').delete().eq('id', id).select('id')
+    if (error || !data?.length) {
+      alert(error ? `삭제 실패: ${error.message}` : '삭제되지 않았습니다. 로그아웃 후 다시 로그인해서 시도해 보세요.')
+    }
     void load()
   }
 
   const purgeAll = async () => {
     if (!supabase || purgeConfirm !== '파기') return
-    await supabase.from('draws').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase.from('participants').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    const { error: e1 } = await supabase.from('draws').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    const { error: e2 } = await supabase.from('participants').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     setShowPurge(false)
     setPurgeConfirm('')
     void load()
-    alert('전체 개인정보가 파기되었습니다.')
+    const err = e1 ?? e2
+    alert(err ? `파기 실패: ${err.message} — 로그아웃 후 다시 로그인해서 시도해 보세요.` : '전체 개인정보가 파기되었습니다.')
   }
 
   return (

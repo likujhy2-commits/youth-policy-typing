@@ -54,20 +54,25 @@ export default function Sentences() {
     if (!supabase || !editText.trim()) return
     const err = validateText(row.level, editText.trim())
     if (err) return alert(err)
-    await supabase.from('sentences').update({ text: editText.trim() }).eq('id', row.id)
+    const { error } = await supabase.from('sentences').update({ text: editText.trim() }).eq('id', row.id)
+    if (error) alert(`저장 실패: ${error.message}`)
     setEditingId(null)
     void load()
   }
 
   const toggle = async (row: Row) => {
     if (!supabase) return
-    await supabase.from('sentences').update({ is_active: !row.is_active }).eq('id', row.id)
+    const { error } = await supabase.from('sentences').update({ is_active: !row.is_active }).eq('id', row.id)
+    if (error) alert(`변경 실패: ${error.message}`)
     void load()
   }
 
   const remove = async (id: string) => {
     if (!supabase || !confirm('이 문장을 삭제할까요?')) return
-    await supabase.from('sentences').delete().eq('id', id)
+    const { data, error } = await supabase.from('sentences').delete().eq('id', id).select('id')
+    if (error || !data?.length) {
+      alert(error ? `삭제 실패: ${error.message}` : '삭제되지 않았습니다. 로그아웃 후 다시 로그인해서 시도해 보세요.')
+    }
     void load()
   }
 
