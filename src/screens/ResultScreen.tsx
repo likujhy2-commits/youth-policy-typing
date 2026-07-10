@@ -7,7 +7,7 @@ import { savePlay } from '../lib/offlineQueue'
 import { addLongEntry } from '../lib/entryLimit'
 
 const APPLY_URL = (import.meta.env.VITE_APPLY_URL as string | undefined) ?? 'https://www.gwangju.go.kr'
-const AUTO_RETURN_SEC = 10
+const AUTO_RETURN_SEC = 30
 
 export default function ResultScreen() {
   const navigate = useNavigate()
