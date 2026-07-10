@@ -65,7 +65,7 @@ export default function ResultScreen() {
 
       {/* 우: 오늘의 랭킹 */}
       <div className="w-96 border-2 border-slate-700 rounded-2xl p-6 bg-slate-950/80">
-        <h3 className="text-2xl text-yellow-300 neon-text mb-4 text-center">🏆 오늘의 TOP 10</h3>
+        <h3 className="text-2xl text-yellow-300 neon-text mb-4 text-center">🏆 최근 3일 TOP 10</h3>
         <ol className="space-y-2 text-xl">
           {ranking.length === 0 && <p className="text-slate-500 text-center py-6">아직 기록이 없어요</p>}
           {ranking.map((r, i) => (

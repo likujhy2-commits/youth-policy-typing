@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../context/SessionContext'
+import { useIdleTimer } from '../hooks/useIdleTimer'
 import { LONG_ENTRY_LIMIT, longEntriesLeft } from '../lib/entryLimit'
 import { refreshSentences } from '../lib/sentences'
 
@@ -12,7 +13,16 @@ const MODES = [
 
 export default function ModeSelectScreen() {
   const navigate = useNavigate()
-  const { participant } = useSession()
+  const { participant, resetSession } = useSession()
+
+  // 모드 선택 화면은 1분 무입력 시 처음 화면으로 (전역 90초보다 짧게)
+  useIdleTimer(
+    () => {
+      resetSession()
+      navigate('/')
+    },
+    60_000,
+  )
 
   // 랭킹전 응모 제한: 등록 참가자만 카운트 (익명 체험은 응모 아님)
   const longLeft = participant ? longEntriesLeft(participant.phone) : null
